@@ -1,0 +1,698 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -304,
+        1024
+      ],
+      "id": "ca036eb9-3176-4302-ab35-5ad34db2f1da",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "ignoreSSL": false
+        }
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        944
+      ],
+      "id": "e34756bf-ca89-41bb-8950-ee7071dcb7b4",
+      "name": "RSS Read1"
+    },
+    {
+      "parameters": {
+        "maxItems": "={{ $('Config').item.json.rss.maxitems }}"
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        144,
+        944
+      ],
+      "id": "fc363072-cebe-4acd-8f44-adf72e90cf43",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.inputFile }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        1024
+      ],
+      "id": "7c08ffc5-01ea-4481-993c-a0e69226a077",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        1024
+      ],
+      "id": "10613b70-9071-4b02-9d0a-0a57e00f2464",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "41408686-f4cd-4e18-8a30-c5ffe9937f38",
+              "name": "item_source",
+              "value": "={{ $('Loop Over Items').item.json.site }}",
+              "type": "string"
+            },
+            {
+              "id": "fcb0ea99-c5c8-4b75-bb55-1e27ef8f157a",
+              "name": "item_html",
+              "value": "=<li><a href=\"{{ $json.link }}\">{{ $json.title }}</a></li>",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        944
+      ],
+      "id": "4f00e820-439d-4c8c-9381-1411d912346c",
+      "name": "Add new fields"
+    },
+    {
+      "parameters": {
+        "content": "## Get active feeds from file",
+        "height": 340,
+        "width": 660,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1024,
+        848
+      ],
+      "id": "21a19628-6335-47c0-b17c-2580d4572de2",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Get first N items from each feed",
+        "height": 340,
+        "width": 1040,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        848
+      ],
+      "id": "daf47ba7-ed49-4438-bef8-806e1098b331",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1408,
+        1120
+      ],
+      "id": "25373070-99fd-4b2b-bc9f-d433d5090f50",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json[\"chatInput\"] || $json[\"content\"] || $json[\"text\"] }}\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        1248,
+        848
+      ],
+      "id": "1564dd3c-00e3-4b80-a6e4-96e604789411",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        1072
+      ],
+      "id": "00bb74ab-23b2-4f3e-91ef-f1efb4b526c8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2sJlmXaZYn4HHDTD",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Ask AI Agent to make summary and send email",
+        "height": 540,
+        "width": 1260,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        752,
+        672
+      ],
+      "id": "556809f0-396c-4ff0-b92d-0a2f2e96479e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "item_html",
+              "separateBy": "\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        944
+      ],
+      "id": "a1a818d9-2962-46c7-b01f-d3ebb40c4389",
+      "name": "Group HTML items"
+    },
+    {
+      "parameters": {
+        "html": "={{ $json.concatenated_item_html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        848
+      ],
+      "id": "25cd590a-8c89-481b-abd8-43ac71497a17",
+      "name": "HTML to Markdown"
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        848
+      ],
+      "id": "80a5f591-5fdd-4e0a-bc87-7b69ad8874fe",
+      "name": "Markdown  to HTML"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "html",
+              "separateBy": "\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        128,
+        272
+      ],
+      "id": "07b1e6e6-9638-4e22-865b-e7fabad9e750",
+      "name": "Concatenate HTML"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bbe171aa-9c18-4c45-b98d-706064ab90aa",
+              "leftValue": "={{ $('Config').item.json.email.active }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        272
+      ],
+      "id": "f56a4376-adb2-49e7-a9ee-05e99e1b9af2",
+      "name": "If Output to Email"
+    },
+    {
+      "parameters": {
+        "html": "<h4>{{ $('Loop Over Items').item.json.site }}</h4>\n<p>{{ $json.data }}</p>\n<ul>\n  {{ $('Group HTML items').item.json.concatenated_item_html }}\n</ul>\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1840,
+        976
+      ],
+      "id": "2f3a0d4c-a6ff-4b90-88ab-269bc630c6ca",
+      "name": "Set HTML Block"
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>Scapping RSS feeds</title>\n  <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css\" rel=\"stylesheet\"\n    integrity=\"sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7\" crossorigin=\"anonymous\">\n  <script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js\"\n    integrity=\"sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq\"\n    crossorigin=\"anonymous\"></script>\n</head>\n<body>\n  <div class=\"container\">\n    {{ $json.concatenated_html }}\n  </div>\n</body>\n</html>\n\n<style>\n.container {\n  background-color: #ffffff;\n  text-align: left;\n  padding: 16px;\n  border-radius: 8px;\n}\n\nh1 {\n  color: #ff6d5a;\n  font-size: 24px;\n  font-weight: bold;\n  padding: 8px;\n}\n\nh2 {\n  color: #909399;\n  font-size: 18px;\n  font-weight: bold;\n  padding: 8px;\n}\n</style>\n\n<script>\nconsole.log(\"Hello World!\");\n</script>"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        352,
+        272
+      ],
+      "id": "11f3cbb9-052b-40ac-87fb-a02a453d2567",
+      "name": "Set HTML Page"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bbe171aa-9c18-4c45-b98d-706064ab90aa",
+              "leftValue": "={{ $('Config').item.json.ai.agent }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        944
+      ],
+      "id": "954034bf-afb0-482f-b981-9217d35ead89",
+      "name": "If Output to Message1"
+    },
+    {
+      "parameters": {
+        "html": "<h4>{{ $('Loop Over Items').item.json.site }}</h4>\n<ul>\n  {{ $('Group HTML items').item.json.concatenated_item_html }}\n</ul>\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        1040
+      ],
+      "id": "4a69114a-87e2-4085-a4a0-a5f0ac3274e1",
+      "name": "Set HTML Block1"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"inputFile\": \"/data/your-feeds-2.csv\",\n  \"outputFile\": \"/data/output.json\",\n  \"filterField\": \"status\",\n  \"filterValue\": \"active\"\n}\n",
+        "options": {
+          "dotNotation": false
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1184,
+        1024
+      ],
+      "id": "fa772c24-2aae-4278-ae13-2c15e4bbb919",
+      "name": "Config"
+    },
+    {
+      "parameters": {
+        "chatId": "7311145066",
+        "text": "=message = {{ $json.html.substring(0, 4000) }}\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        976,
+        270.1007161346317
+      ],
+      "id": "6a392e51-73a6-4aad-8fc8-e5f13604d447",
+      "name": "Send a text message",
+      "webhookId": "4f9060e6-d86d-40fc-9817-3d0c3df81c97",
+      "credentials": {
+        "telegramApi": {
+          "id": "iWO06pQRWRyYxc5x",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "html",
+        "binaryPropertyName": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        368
+      ],
+      "id": "095fac54-73b0-4bd0-97c0-ef75105e6fbb",
+      "name": "Convert to File"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "RSS Read1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "RSS Read1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read1": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Add new fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add new fields": {
+      "main": [
+        [
+          {
+            "node": "Group HTML items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Markdown  to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Group HTML items": {
+      "main": [
+        [
+          {
+            "node": "If Output to Message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML to Markdown": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown  to HTML": {
+      "main": [
+        [
+          {
+            "node": "Set HTML Block",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Concatenate HTML": {
+      "main": [
+        [
+          {
+            "node": "Set HTML Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Output to Email": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set HTML Block": {
+      "main": [
+        [
+          {
+            "node": "Concatenate HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set HTML Page": {
+      "main": [
+        [
+          {
+            "node": "If Output to Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Output to Message1": {
+      "main": [
+        [
+          {
+            "node": "HTML to Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set HTML Block1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set HTML Block1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9cac2039-c295-480e-9733-19cb70a40858",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3aa1d326bd70c9bc27cb9ea8c2a73416c3b0082f6809872cf27e6ff827714ecd"
+  },
+  "id": "w451TH8bGmUgIRLb",
+  "tags": []
+}
