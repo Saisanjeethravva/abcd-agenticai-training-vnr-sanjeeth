@@ -1,56 +1,64 @@
 # 🧠 AI-Powered RSS Feed Summarizer — End-to-End Automation Workflow
 
 ## 🌐 Overview
-This n8n workflow automates the entire process of fetching RSS feeds, summarizing their contents using an AI model, and sending formatted digests through Telegram or email.  
-It simplifies AI-driven news aggregation by combining automation, data parsing, and LLM-based summarization in a single workflow.
+This **n8n workflow** automates the process of fetching RSS feeds, summarizing them using AI, and sending formatted digests through Telegram or Email.  
+It is an **end-to-end AI-driven content pipeline** combining automation, feed parsing, summarization, and publishing.
 
 ---
 
 ## ⚙️ Features
-- 🔁 Automated feed fetching via **RSS Read** node  
-- 🧩 Intelligent batching and filtering  
-- 🧠 AI summarization using **Google Gemini** through n8n’s LangChain integration  
-- 💌 Optional delivery through **Telegram** or HTML-formatted email  
-- 🗂 Structured output files for further analysis or storage  
+- 🔁 **Automated RSS Fetching** via n8n’s RSS node  
+- 🧩 **Looping & Filtering** to handle multiple feeds  
+- 🧠 **AI Summarization** using Google Gemini via n8n’s LangChain integration  
+- 💌 **Email or Telegram Delivery** of AI summaries  
+- 📂 **JSON & HTML File Outputs** for archiving or sharing  
 
 ---
 
 ## 🧭 Workflow Overview
 
 ### 1️⃣ Configuration and Scheduling
-- **Schedule Trigger:** defines when the workflow runs (daily, hourly, etc.)
-- **Config Node:** loads parameters such as  
-  - Input file path for feed URLs → `/data/your-feeds-2.csv`  
-  - Output file path → `/data/output.json`  
-  - Email and AI toggles (`active` flags)
+- **Schedule Trigger:** Sets the workflow frequency (e.g., daily 8 AM)
+- **Config Node:** Loads parameters like:
+  - `inputFile`: path to your RSS feed list  
+  - `outputFile`: path to save summaries  
+  - `active` flags for enabling/disabling nodes
+
+---
 
 ### 2️⃣ Feed Extraction and Looping
-- **Read/Write Files from Disk:** reads the CSV/JSON containing feed links  
-- **Extract from File:** parses it into structured JSON  
-- **Loop Over Items:** iterates through each feed URL and sends them to the RSS Reader
+- **Read/Write Files from Disk:** Reads your feed list from a `.csv` or `.json` file  
+- **Extract from File:** Parses and converts data into n8n JSON format  
+- **Loop Over Items:** Iterates through each feed URL and sends it to the **RSS Read** node  
+
+---
 
 ### 3️⃣ Fetch and Format Feed Items
-- **RSS Read1:** reads the latest posts from each feed URL  
-- **Limit Node:** restricts how many posts are fetched (`rss.maxitems`)  
-- **Add New Fields:** adds site name and converts items into clickable HTML links  
-- **Group HTML Items:** combines items into a single HTML block
+- **RSS Read1:** Reads latest posts from each feed  
+- **Limit Node:** Restricts how many items to fetch (e.g., 3 per site)  
+- **Add New Fields:** Adds metadata like site name and date  
+- **Group HTML Items:** Combines fetched articles into an HTML-friendly block  
 
-### 4️⃣ AI-Based Summarization
-- **If Output to Message1:** checks whether AI summarization is enabled  
+---
+
+### 4️⃣ AI Summarization
+- **If Node:** Checks whether AI summarization is active  
 - **HTML → Markdown → AI Agent → Markdown → HTML:**  
-  transforms fetched content, summarizes via Gemini, and re-formats to HTML  
-- **Google Gemini Chat Model:** provides the LLM connection for summarization
+  Transforms content, summarizes via **Gemini**, and reconverts to HTML.  
+- **Google Gemini Chat Model:** Connects to Google’s LLM for text summarization  
 
-### 5️⃣ Output Generation
-- **Set HTML Block / Page Nodes:** build the newsletter-style HTML layout  
-- **Concatenate HTML:** aggregates all summaries  
-- **Convert to File:** saves output locally  
-- **Send Telegram Message:** delivers digest to Telegram chat
+---
+
+### 5️⃣ Output and Delivery
+- **Set HTML Block / Page Nodes:** Build final email/HTML layout  
+- **Concatenate HTML:** Combines all site summaries  
+- **Convert to File:** Saves the output locally  
+- **Telegram Node:** Sends summarized text directly to a Telegram chat  
+- **Email Node (optional):** Sends formatted digest to inbox  
 
 ---
 
 ## 🧾 Example Feed File
-
 **`your-feeds-2.csv`**
 ```csv
 site,url,active
